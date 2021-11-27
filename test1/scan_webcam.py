@@ -11,12 +11,12 @@ sfr = SimpleFacerec()
 sfr.load_encoding_images("images/")
 
 abbrList = {"sergo the best": "Ш.С.С", "karen": "С.К.С", "danil": "Х.Д.А", "lex": "Б.А.С"}
-
 man_name = ""
 
 cap = cv2.VideoCapture(0)
 font = cv2.FONT_HERSHEY_PLAIN
 driver = webdriver.Chrome()
+
 
 def validate(ph_name, r):
     print(ph_name)
@@ -31,12 +31,7 @@ def validate(ph_name, r):
     else:
         return False
 
-#url = "https://www.gosuslugi.ru/covid-cert/status/c7e8f7a4-e237-4754-976d-ab6b21817e50?lang=ru" # леша работает
-#url = "https://www.gosuslugi.ru/covid-cert/status/177be104-7ab1-46b3-9734-5cf9455643af?lang=ru" # карина работает
-#url = "https://www.gosuslugi.ru/covid-cert/verify/9610000030478107?lang=ru&ck=8f7566eb9c3c3faa1d1cc5a417331198" # сергей не работает
-#url = "https://www.gosuslugi.ru/covid-cert/status/db87cb9e-28ae-4fbd-a52a-bfd388444fac?lang=ru" # сергей работает
-#url = "https://www.gosuslugi.ru/covid-cert/verify/9610000037817045?lang=ru&ck=4681c73ee10e18e0ec4873e8836aefef" # данил не работает
-#url = "https://www.gosuslugi.ru/covid-cert/status/903d035d-af83-4e10-a1d9-46a2937680dc?lang=ru" #данил работает
+
 while True:
     _, frame = cap.read()
     decodedObjects = pyzbar.decode(frame)
@@ -51,7 +46,6 @@ while True:
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
     for obj in decodedObjects:
-        #print("Data", obj.data)
 
         s = obj.data.decode('UTF-8')
         if "https://www.gosuslugi.ru/covid-cert/" in s:
@@ -70,10 +64,6 @@ while True:
                             (0, 255, 0), 2)
 
                 FIO = FIO.replace('*', '').replace(' ', '.')
-                #print(status)
-                #print(expire_time)
-                print(FIO)
-                print(man_name)
                 if validate(man_name, FIO):
                     message = status+" до "+expire_time+" на имя "+FIO
                     pyautogui.alert(text=message, title='Отчет о считывании', button='OK')
