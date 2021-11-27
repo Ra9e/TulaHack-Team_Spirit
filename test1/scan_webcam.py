@@ -3,6 +3,7 @@ import pyzbar.pyzbar as pyzbar
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
+import pyautogui
 
 from simple_facerec import SimpleFacerec
 
@@ -20,15 +21,15 @@ driver = webdriver.Chrome()
 def validate(ph_name, r):
     print(ph_name)
     if "sergo the best" == ph_name and r == abbrList["sergo the best"]:
-        return r
+        return True
     elif "karen" == ph_name and r == abbrList["karen"]:
-        return r
+        return True
     elif "danil" == ph_name and r == abbrList["danil"]:
-        return r
+        return True
     elif "lex" == ph_name and r == abbrList["lex"]:
-        return r
+        return True
     else:
-        return 'These are different people'
+        return False
 
 #url = "https://www.gosuslugi.ru/covid-cert/status/c7e8f7a4-e237-4754-976d-ab6b21817e50?lang=ru" # леша работает
 #url = "https://www.gosuslugi.ru/covid-cert/status/177be104-7ab1-46b3-9734-5cf9455643af?lang=ru" # карина работает
@@ -62,21 +63,27 @@ while True:
                 # print(el.text)
 
                 soup = BeautifulSoup(driver.page_source, 'html.parser')
-                d = soup.find('span', class_='status-value cert-name').text
-                f = soup.find('div', class_='small-text gray').text
-                r = soup.find('div', class_='attrValue title-h6 bold text-center').text
-                cv2.putText(frame, str(f), (50, 60), font, 4,
+                status = soup.find('span', class_='status-value cert-name').text
+                expire_time = soup.find('div', class_='small-text gray').text
+                FIO = soup.find('div', class_='attrValue title-h6 bold text-center').text
+                cv2.putText(frame, str(expire_time), (50, 60), font, 4,
                             (0, 255, 0), 2)
 
-                r = r.replace('*', '').replace(' ', '.')
-                #print(d)
-                #print(f)
-                print(r)
+                FIO = FIO.replace('*', '').replace(' ', '.')
+                #print(status)
+                #print(expire_time)
+                print(FIO)
                 print(man_name)
-                print(validate(man_name, r))
+                if validate(man_name, FIO):
+                    message = status+" до "+expire_time+" на имя "+FIO
+                    pyautogui.alert(text=message, title='Отчет о считывании', button='OK')
+                else:
+                    pyautogui.alert(text='Это QR code другого человека', title='Отчет о считывании', button='OK')
 
             except:
                 pass
+        else:
+            pyautogui.alert(text='Это недействительный QR code, попробуйте снова', title='Отчет о считывании', button='OK')
 
     cv2.imshow("Frame", frame)
 
