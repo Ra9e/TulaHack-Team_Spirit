@@ -1,21 +1,20 @@
 import cv2
 import pyzbar.pyzbar as pyzbar
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from bs4 import BeautifulSoup
 import pyautogui
 
 from simple_facerec import SimpleFacerec
+from test1.parser import Parsing
 
 sfr = SimpleFacerec()
 sfr.load_encoding_images("images/")
+
+prs = Parsing()
 
 abbrList = {"sergo the best": "Ш.С.С", "karen": "С.К.С", "danil": "Х.Д.А", "lex": "Б.А.С"}
 man_name = ""
 
 cap = cv2.VideoCapture(0)
 font = cv2.FONT_HERSHEY_PLAIN
-driver = webdriver.Chrome()
 
 
 def validate(ph_name, r):
@@ -51,21 +50,14 @@ while True:
         if "https://www.gosuslugi.ru/covid-cert/" in s:
             print("Data: ", obj.data, "\n")
 
-            driver.get(s)
             try:
-                el = driver.find_element(By.XPATH, "/html/body/div/div[2]/div[1]/div[4]/div/span[2]")
-                # print(el.text)
-
-                soup = BeautifulSoup(driver.page_source, 'html.parser')
-                status = soup.find('span', class_='status-value cert-name').text
-                expire_time = soup.find('div', class_='small-text gray').text
-                FIO = soup.find('div', class_='attrValue title-h6 bold text-center').text
-                cv2.putText(frame, str(expire_time), (50, 60), font, 4,
+                prs.parse(s)
+                cv2.putText(frame, str(prs.expire_time_getter()), (50, 60), font, 4,
                             (0, 255, 0), 2)
 
-                FIO = FIO.replace('*', '').replace(' ', '.')
-                if validate(man_name, FIO):
-                    message = status+" до "+expire_time+" на имя "+FIO
+                print(prs.FIO_getter())
+                if validate(man_name, prs.FIO_getter()):
+                    message = prs.status_getter()+" до "+prs.expire_time_getter()+" на имя "+prs.FIO_getter()
                     pyautogui.alert(text=message, title='Отчет о считывании', button='OK')
                 else:
                     pyautogui.alert(text='Это QR code другого человека', title='Отчет о считывании', button='OK')
